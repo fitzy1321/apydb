@@ -1,0 +1,12 @@
+[project]
+name = "pyddb"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.14"
+dependencies = []
+
+[project.optional-dependencies]
+orjson = [
+    "orjson>=3.11.5",
+]
