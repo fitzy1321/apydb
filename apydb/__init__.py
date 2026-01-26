@@ -19,8 +19,9 @@ def touch(file_path: str | Path) -> None:
 
 
 ## What Do I want for this object?
-# - [ ] I want to save Dicts to Json files
-# - [ ] I want to have optional dependency orjson as a potential parser
+# - [x] I want to save Dicts to Json files
+# - [x] I want to have optional dependency orjson as a potential parser
+# - [ ] Maybe Async operations?
 
 
 class Storage(ABC):
@@ -55,6 +56,12 @@ class JSONStorage(Storage):
             with open(self._filepath, "w", encoding="utf-8") as f:
                 json.dump(data, f, ensure_ascii=False, indent=2)  # type: ignore
 
+    async def aioread(self) -> dict:
+        pass
+
+    async def aiowrite(self, data: dict) -> None:
+        pass
+
 
 class MemoryStorage(Storage):
     def __init__(self) -> None:
@@ -67,4 +74,4 @@ class MemoryStorage(Storage):
         self._data = data  # overwrite data, or update existing?
 
 
-__all__ = ["touch", "JSONStorage"]
+__all__ = ["touch", "Storage", "JSONStorage", "MemoryStorage"]

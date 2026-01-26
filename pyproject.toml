@@ -1,18 +1,15 @@
 [project]
-name = "pyddb"
+name = "apydb"
 version = "0.1.0"
-description = "Add your description here"
+description = "A Python DB, Local Document(JSON) DB"
 readme = "README.md"
 requires-python = ">=3.14"
 dependencies = []
 
 [project.optional-dependencies]
-orjson = [
-    "orjson>=3.11.5",
-]
+orjson = ["orjson>=3.11.5"]
+async = ["aiofiles>=25.1.0"]
+all = ["aiofiles>=25.1.0", "orjson>=3.11.5"]
 
 [dependency-groups]
-dev = [
-    "pytest>=9.0.2",
-    "ruff>=0.14.14",
-]
+dev = ["pytest>=9.0.2", "ruff>=0.14.14"]

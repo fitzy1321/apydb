@@ -1,5 +1,6 @@
 import pytest
-from pyddb import JSONStorage
+
+from apydb import JSONStorage
 
 
 def test_fallback_to_builtin_json(monkeypatch):
