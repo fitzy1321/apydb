@@ -1,4 +1,4 @@
-# Another Python Doc DB
+# Another Python DB Library
 
 Basically MongoDB, but dicts and JSON and local files.
 
