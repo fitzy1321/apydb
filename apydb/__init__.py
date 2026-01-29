@@ -1,77 +1,78 @@
-from abc import ABC, abstractmethod
+from __future__ import annotations
+
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
-try:
-    import orjson  # pyright: ignore[reportMissingImports]
-except ImportError:
-    orjson = None
-    import json
+from apydb.storage import JSONStorage, MemoryStorage, Storage
+
+__COLLECTIONS = "collections"
 
 
-def touch(file_path: str | Path) -> None:
-    """Create file, should _not_ override file if exists, but will update modified date."""
-    # what _is_ a valid path, anyway?
-    # screw it for now, if it works on my machine it works for now.
-    fp = Path(file_path) if isinstance(file_path, str) else file_path
-    fp.parent.mkdir(parents=True, exist_ok=True)
-    fp.touch(exist_ok=True)
+class Collection:
+    def __init__(self, database: Database, name: str) -> None:
+        self._db = database
+        self._name = name
 
 
-## What Do I want for this object?
-# - [x] I want to save Dicts to Json files
-# - [x] I want to have optional dependency orjson as a potential parser
-# - [ ] Maybe Async operations?
+class Database:
+    def __init__(self, storage: Storage, lazy=True) -> None:
+        self._storage = storage
+        self._dirty = False
 
-
-class Storage(ABC):
-    @abstractmethod
-    def read(self) -> Optional[Any]:
-        raise NotImplementedError()
-
-    @abstractmethod
-    def write(self, data: Any):
-        raise NotImplementedError()
-
-
-class JSONStorage(Storage):
-    def __init__(self, filename: str | None = None) -> None:
-        super().__init__()
-        self.filename = "db.json" if not filename else filename
-        self._filepath = Path(self.filename)
-        touch(self._filepath)
-
-    def read(self) -> dict:
-        if orjson is not None:
-            with open(self._filepath, "rb") as f:
-                return orjson.loads(f.read())
-        with open(self._filepath, "r", encoding="utf-8") as f:
-            return json.load(f)  # type: ignore
-
-    def write(self, data: dict) -> None:
-        if orjson is not None:
-            with open(self._filepath, "wb") as f:
-                f.write(orjson.dumps(data))
+        if lazy:
+            self._data: dict[str, Any] | None = None
         else:
-            with open(self._filepath, "w", encoding="utf-8") as f:
-                json.dump(data, f, ensure_ascii=False, indent=2)  # type: ignore
+            self._load()
 
-    async def aioread(self) -> dict:
-        pass
+        self._collections: dict[str, Collection] = {}
 
-    async def aiowrite(self, data: dict) -> None:
-        pass
+    def _load(self) -> None:
+        if self._data is not None:
+            return
+
+        self._data = self._storage.read()
+        if self._data is None or not self._data or __COLLECTIONS not in self._data:
+            self._data = {__COLLECTIONS: {}}
+
+    def __getitem__(self, name: str) -> Collection:
+        # ? Error or Default String?
+        if not name:
+            raise ValueError("'name' string must have a value")
+
+        if self._data is None:
+            self._load()
+
+        if name not in self._collections:
+            self._collections[name] = Collection(self, name)
+        return self._collections[name]
 
 
-class MemoryStorage(Storage):
-    def __init__(self) -> None:
-        self._data = {}  # empty dict or None here?
+# I'm thinking MongoDB like interface
+class Client:
+    def __init__(self, data_dir: str | Path = "./data") -> None:
+        self._base_dir = Path(data_dir)
+        self._dbs: dict[str, Database] = {}
 
-    def read(self) -> dict:
-        return self._data
+    def __getitem__(self, name: str) -> Database:
+        """Get a Database. Name maps to json file name."""
+        # ? Error or Default String?
+        if not name:
+            raise ValueError("'name' string must have a value")
 
-    def write(self, data: dict) -> None:
-        self._data = data  # overwrite data, or update existing?
+        if name not in self._dbs:
+            self._dbs[name] = Database(JSONStorage(self._base_dir / f"{name}.json"))
+        return self._dbs[name]
+
+    def list_dbs(self) -> list[str]:
+        """List all databases."""
+        return [f.stem for f in self._base_dir.glob("*.json")]
 
 
-__all__ = ["touch", "Storage", "JSONStorage", "MemoryStorage"]
+__all__ = [
+    "Client",
+    "Collection",
+    "Database",
+    "JSONStorage",
+    "MemoryStorage",
+    "Storage",
+]
