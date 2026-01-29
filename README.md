@@ -10,6 +10,8 @@ And Lazy Loading.
 
 ## Example of something ...
 
+How the json file __should__ look
+
 ```json
 {
   "collections" : {
