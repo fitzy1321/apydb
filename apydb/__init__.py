@@ -1,17 +1,60 @@
 from __future__ import annotations
 
+from enum import StrEnum
 from pathlib import Path
 from typing import Any
 
 from apydb.storage import JSONStorage, MemoryStorage, Storage
 
-__COLLECTIONS = "collections"
+_COLLECTIONS = "collections"
 
 
 class Collection:
     def __init__(self, database: Database, name: str) -> None:
         self._db = database
         self._name = name
+
+    def to_dict(self) -> dict:
+        if not hasattr(self, "_last_id"):
+            self._last_id = 0
+        return {
+            self._name: {  # ? include this level, or flat dict?
+                "_last_id": self._last_id,
+                "docs": {
+                    # ? what goes here?
+                },
+            }
+        }
+
+
+class LogicOps(StrEnum):
+    AND = "$and"
+    NOR = "$nor"
+    OR = "$or"
+
+
+class FieldOps(StrEnum):
+    EQ = "$eq"
+    NE = "$ne"
+    GT = "$gt"
+    GTE = "$gte"
+    LT = "$lt"
+    LTE = "$lte"
+    IN = "$in"
+    NIN = "$nin"
+    EXISTS = "$exists"
+
+
+class UpdateOps(StrEnum):
+    SET = "$set"
+    UNSET = "$unset"
+    INC = "$inc"
+    PUSH = "$push"
+    PULL = "$pull"
+
+
+def matches(doc: dict, query: dict[str, Any]) -> bool:
+    pass
 
 
 class Database:
@@ -31,8 +74,8 @@ class Database:
             return
 
         self._data = self._storage.read()
-        if self._data is None or not self._data or __COLLECTIONS not in self._data:
-            self._data = {__COLLECTIONS: {}}
+        if self._data is None or not self._data or _COLLECTIONS not in self._data:
+            self._data = {_COLLECTIONS: {}}
 
     def __getitem__(self, name: str) -> Collection:
         # ? Error or Default String?

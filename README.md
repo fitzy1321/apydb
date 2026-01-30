@@ -18,7 +18,7 @@ How the json file __should__ look
     "[insert_name]":{
       "_last_id":0,
       "docs":{
-        
+        //? what goes here?
       }
     }
   }
