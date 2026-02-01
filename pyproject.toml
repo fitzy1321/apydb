@@ -10,6 +10,12 @@ dependencies = []
 orjson = ["orjson>=3.11.5"]
 async = ["aiofiles>=25.1.0"]
 all = ["aiofiles>=25.1.0", "orjson>=3.11.5"]
+itest = [
+    "pymongo>=4.16.0",
+]
 
 [dependency-groups]
-dev = ["pytest>=9.0.2", "ruff>=0.14.14"]
+dev = [
+    "pytest>=9.0.2",
+    "ruff>=0.14.14",
+]
