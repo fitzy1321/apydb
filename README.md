@@ -12,15 +12,13 @@ And Lazy Loading.
 
 How the json file __should__ look
 
+file path and naming: `./[client_dir=default './data']/[database_dir_name]/[collection_name].json`
+
 ```json
 {
-  "collections" : {
-    "[insert_name]":{
-      "_last_id":0,
-      "docs":{
-        //? what goes here?
-      }
-    }
-  }
+  "docs" : [
+    {"_id": 0, ...},
+    {"_id": 1, ...}
+  ]
 }
 ```
