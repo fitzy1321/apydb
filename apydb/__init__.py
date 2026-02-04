@@ -205,7 +205,7 @@ class Collection:
 
         self._data["docs"].extend(documents)
         self._storage.write(self._data)
-        return
+        return InsertManyResult(ids)
 
     def find(self) -> list[Document]:
         if self._data is None:

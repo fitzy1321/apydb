@@ -22,3 +22,20 @@ file path and naming: `./[client_dir=default './data']/[database_dir_name]/[coll
   ]
 }
 ```
+
+## Interface
+
+Using this series of pages to make my interface: [w3 Python Mongo](https://www.w3schools.com/python/python_mongodb_getstarted.asp)
+
+Sections:
+
+- [x] Create DB and Collections
+- [x] "list_database_names" and "list_collection_names"
+- [x] Insert into Collections
+- [ ] Find in Collection
+- [ ] Query
+- [ ] Sort
+- [ ] Delete
+- [ ] Drop Collection
+- [ ] Update
+- [ ] Limit
