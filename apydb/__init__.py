@@ -121,9 +121,20 @@ class InsertOneResult:
         self.__inserted_id = inserted_id
 
     @property
-    def inserted_id(self) -> Any:
+    def inserted_id(self) -> str | None:
         """The inserted document's _id."""
         return self.__inserted_id
+
+
+class InsertManyResult:
+    __slots__ = "__inserted_ids"
+
+    def __init__(self, inserted_ids: list | None) -> None:
+        self.__inserted_ids = inserted_ids
+
+    @property
+    def inserted_ids(self) -> list | None:
+        return self.__inserted_ids
 
 
 class Collection:
@@ -174,13 +185,19 @@ class Collection:
         self._storage.write(self._data)
         return result
 
-    def insert_many(self, documents: list[Document]):  # -> InsertManyResult:
+    def insert_many(self, documents: list[Document]) -> InsertManyResult:
         if not documents or not documents[0]:
             raise ValueError("please provide at least one value!")
 
+        ids = []
         for doc in documents:
             if "_id" not in doc:
-                doc["_id"] = str(uuid.uuid4())
+                new_id = str(uuid.uuid4())
+                doc["_id"] = new_id
+                ids += new_id
+            else:
+                # ? Do I need to check if Id already exists here?
+                ids += doc["_id"]
 
         if self._data is None:
             self._load()
@@ -233,7 +250,16 @@ class Database:
                 self,
                 self._storage_type(self._db_dir, collection_name),  # type:ignore
             )
+
+        if hasattr(self, "_collection_files"):
+            self._collection_files += collection_name
+
         return self._collections[collection_name]
+
+    def list_collection_names(self) -> list[str]:
+        if not hasattr(self, "_collection_files"):
+            self._collection_files = [p.stem for p in self._db_dir.glob("*.json")]
+        return self._collection_files
 
 
 ####################################################################
@@ -266,3 +292,8 @@ class Client:
                 storage_type=self._storage_type,
             )
         return self._databases[database_name]
+
+    def list_database_names(self) -> list[str]:
+        if not hasattr(self, "_db_sub_dirs"):
+            self._db_sub_dirs = [p.name for p in self._base_dir.iterdir() if p.is_dir()]
+        return self._db_sub_dirs
